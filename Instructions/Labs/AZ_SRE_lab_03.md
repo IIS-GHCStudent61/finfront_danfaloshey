@@ -85,9 +85,11 @@ In this task, you will deploy a virtual machine that will be used to test monito
 
 1. Select **View** in the **VM Insights** box, and then select **Configure Insights**.
 
-1. Select **Enable** next to your virtual machine, and then **Enable on the Azure Monitor - Insights Onboarding** blade. **Uncheck Enable detailed metrics \[Preview\] OpenTelemetry metrics**
+1. Select **Enable** next to your virtual machine, and then **Enable on the Azure Monitor - Insights Onboarding** blade. **Uncheck Enable detailed metrics \[Preview\] OpenTelemetry metrics** and **check \[Classic\] Log-based metrics**.
 
-1. Take the defaults for subscription and data collection rules, then select **Configure**.
+    >**Note:** Log-based metrics are required for the queries in Task 6.
+
+1. Take the defaults for subscription and data collection rules, then select **Review + enable** and **Enable**.
    
     ![lab03_enable_vm_insight.png](media/lab03_enable_vm_insight.png)
 
@@ -120,7 +122,7 @@ In this task, you create an alert for when a virtual machine is deleted.
 In this task, if the alert is triggered send an email notification to the operations team. 
 
 1. Continue working on your alert. Select **Next: Actions**
-1. Select **Use action groups** then select **Create action group** in the **Select action group** blade.
+1. Select **+ Create action group**.
 
     >**Did you know?** You can add up to five action groups to an alert rule. Action groups are executed concurrently, in no specific order. Multiple alert rules can use the same action group. 
 
@@ -131,7 +133,7 @@ In this task, if the alert is triggered send an email notification to the operat
     | **Project details** |
     | Subscription | your subscription |
     | Resource group | **rg-studentNN-lab03** |
-    | Region | **Global** (default) |
+    | Region | **Global** |
     | **Instance details** |
     | Action group name | `Alert the operations team` (must be unique in the resource group) |
     | Display name | `AlertOpsTeam` |
@@ -145,7 +147,7 @@ In this task, if the alert is triggered send an email notification to the operat
 
 1. Select **Email**, and in the **Email** box, enter your email address, and then select **OK**. 
 
-    >**Note:** You should receive an email notification saying you were added to an action group. There may be a few minutes delay, but that is a sure sign the rule has deployed.
+    >**Note:** You will receive a verification email from Azure. **Open it and verify your email address**, otherwise the alert email in Task 4 will not be sent.
 
 1. Select **Review + Create** and then **Create**.
    
@@ -170,9 +172,9 @@ In this task, you trigger the alert and confirm a notification is sent.
 
 1. Check the box for the **az104-vm0** virtual machine.
 
-1. Select **Delete** from the menu bar.
+1. Select **...** from the menu bar, then **Delete**.
 
-1. Check the box for **Apply force delete**. Check the box at the bottom confirming that you want the resources to be deleted and select **Delete**. 
+1. Type `delete` in the confirmation box, select **Delete**, then confirm with **Delete**. 
 
 1. In the title bar, select the **Notifications** icon and wait until **vm0** is successfully deleted.
 
@@ -194,7 +196,7 @@ In this task, you create an alert rule to suppress notifications during a mainte
 
 1. Continue in the **Alerts** blade, select **Alert processing rules** and then **+ Create**. 
    
-1. Select your **Subscription**, then select **Apply**.
+1. Select your **rg-studentNN-lab03** resource group, then select **Apply**.
    
 1. Select **Next: Rule settings**, then select **Suppress notifications**.
    
@@ -209,6 +211,8 @@ Enter these settings for the scheduling of the alert processing rule:
     | Start | Enter today's date at 10 pm. |
     | End | Enter tomorrow's date at 7 am. |
     | Time zone | Select the local timezone. |
+
+    >**Note:** Make sure you select **At a specific time**. The default (**Always**) would suppress all notifications.
 
     ![Screenshot of the scheduling section of an alert processing rule](media/az104-lab11-alert-processing-rule-schedule.png)
 
@@ -231,6 +235,8 @@ In this task, you will use Azure Monitor to query the data captured from the vir
 1. If necessary, close the splash screen. 
 
 1. If necessary, select a scope, your **Subscription**. Select **Apply**. 
+
+1. If an **Observability Agent** chat opens, turn off the **Agent** toggle (top right) to show the query editor.
 
 1. In the **Queries** tab, select **Virtual machines** (left pane). You may need to reopen the blade.
 
