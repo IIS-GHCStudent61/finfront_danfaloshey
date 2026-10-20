@@ -57,7 +57,7 @@ In this lab, you will explore how to create a web application and blob storage o
     | Setting | Action |
     |--|--|
     | **Subscription** drop-down list | Retain the default value -  |
-    | **Resource group** section | Select **Training-Student-0xx-OC0xx** |
+    | **Resource group** section | Select **rg-studentNN** |
     | **Storage account name** text box | Enter **filestor**[yourname] |
     | **Region** drop-down list | Select **(US) East US** |
     | **Primary service** | **Azure Blob Storage or Azure Data Lake Storage Gen 2** |
@@ -169,7 +169,7 @@ git clone https://github.com/jruels/azure-sre
    | Setting                            | Action                                                                                                  |
    | ---------------------------------- | ------------------------------------------------------------------------------------------------------- |
    | **Subscription** drop-down list    | Retain the default value                                                                                |
-   | **Resource group** section         | Select **Training-Student-0xx-OC0xx**                                                                              |
+   | **Resource group** section         | Select **rg-studentNN**                                                                              |
    | **Name** text box                  | Enter **finapi**-[yourname]                                                                            |
    | **Secure unique default hostname** | **Disabled**                                                                                            |
    | **Publish** section                | Select **Code**                                                                                         |
@@ -247,28 +247,27 @@ git clone https://github.com/jruels/azure-sre
    ```
    > Make sure to select **work account**.
    
-1. In the **Microsoft Edge** browser window, enter the email address and password for your Microsoft account, and then select **Sign in**.
-   > **Note:** The first time connection might require to send a code to your email address 
+1. In the **Microsoft Edge** browser window, sign in with your **UPN** and **TAP** from the class sheet (Azure tab): enter the UPN, select **Next**, enter the TAP on the **Enter Temporary Access Pass** page, and then select **Sign in**.
 
 1. Return to the currently open **Terminal** window and select the tenant and subscribtion to connect.
-   > **Note:** For most cases you will see only one option available (OPSCO Solutions). Type 1, then press enter.
+   > **Note:** For most cases you will see only one option available (our class tenant, iisadmin3innovationinsoftwa.onmicrosoft.com). Type 1, then press enter.
 
-1. List all the apps in your **Training-Student-0xx-OC0xx** resource group: Within the terminal, enter the following command, and then select Enter. 
+1. List all the apps in your **rg-studentNN** resource group: Within the terminal, enter the following command, and then select Enter. 
 
    ```
-   az webapp list --resource-group Training-Student-0xx-OC0xx
+   az webapp list --resource-group rg-studentNN
    ```
 
 1. Find the apps that have the **finapi\*** prefix: Enter the following command, and then select Enter.
 
    ```
-   az webapp list --resource-group Training-Student-0xx-OC0xx --query "[?starts_with(name, 'finapi')]"
+   az webapp list --resource-group rg-studentNN --query "[?starts_with(name, 'finapi')]"
    ```
 
 1. Render only the name of the single app that has the **finapi\*** prefix: Enter the following command, and then select Enter.
 
    ```
-   az webapp list --resource-group Training-Student-0xx-OC0xx --query "[?starts_with(name, 'finapi')].{Name:name}" --output tsv
+   az webapp list --resource-group rg-studentNN --query "[?starts_with(name, 'finapi')].{Name:name}" --output tsv
    ```
 
 1. Enter the following command, and then select Enter to change the current directory to the **~/azure-sre/Allfiles/Labs/02/Starter/API** directory that contains the lab files:
@@ -282,7 +281,7 @@ git clone https://github.com/jruels/azure-sre
 1. Enter the following command, and then select Enter to deploy the **api.zip** file to the web app that you created previously in this lab:
 
    ```
-   az webapp deploy --resource-group Training-Student-0xx-OC0xx --name <name-of-your-api-app> --src-path api.zip --type zip --restart true
+   az webapp deploy --resource-group rg-studentNN --name <name-of-your-api-app> --src-path api.zip --type zip --restart true
    ```
 
    > **Note**: Replace the *\<name-of-your-api-app\>* placeholder with the name of the web app that you created previously in this lab. You recently queried this app’s name in the previous steps.
@@ -298,9 +297,9 @@ git clone https://github.com/jruels/azure-sre
 
 1. On the Azure portal's **navigation** pane, select the **Resource groups** link.
 
-1. On the **Resource groups** blade, select the **Training-Student-0xx-OC0xx** resource group.
+1. On the **Resource groups** blade, select the **rg-studentNN** resource group.
 
-1. On the **Training-Student-0xx-OC0xx** blade, select the **finapi**-[yourname] web app that you created previously in this lab.
+1. On the **rg-studentNN** blade, select the **finapi**-[yourname] web app that you created previously in this lab.
 
 1. From the **App Service** blade, select **Browse**.
 
@@ -348,7 +347,7 @@ In this exercise, you created a web app in Azure, and then deployed your web app
    | Setting                            | Action                        |
    | ---------------------------------- | ----------------------------- |
    | **Subscription** drop-down list    | Retain the default value      |
-   | **Resource group** section         | Select **Training-Student-0xx-OC0xx**    |
+   | **Resource group** section         | Select **rg-studentNN**    |
    | **Name** text box                  | Enter **finweb**-[yourname]  |
    | **Secure unique default hostname** | **Disabled**                  |
    | **Publish** section                | Select **Code**               |
@@ -414,26 +413,26 @@ In this exercise, you created a web app in Azure, and then deployed your web app
    az login
    ```
 
-1. In the **Microsoft Edge** browser window, enter the email address and password for your Microsoft account, and then select **Sign in**.
+1. In the **Microsoft Edge** browser window, sign in with your **UPN** and **TAP** from the class sheet (Azure tab): enter the UPN, select **Next**, enter the TAP on the **Enter Temporary Access Pass** page, and then select **Sign in**.
 
 1. Return to the currently open **Terminal** window. Wait for the sign-in process to finish.
 
-1. List all the apps in your **Training-Student-0xx-OC0xx** resource group: Within the terminal, enter the following command, and then select Enter. 
+1. List all the apps in your **rg-studentNN** resource group: Within the terminal, enter the following command, and then select Enter. 
 
    ```
-   az webapp list --resource-group Training-Student-0xx-OC0xx
+   az webapp list --resource-group rg-studentNN
    ```
 
 1. Find the apps that have the **finweb\*** prefix: Enter the following command, and then select Enter.
 
    ```
-   az webapp list --resource-group Training-Student-0xx-OC0xx --query "[?starts_with(name, 'finweb')]"
+   az webapp list --resource-group rg-studentNN --query "[?starts_with(name, 'finweb')]"
    ```
 
 1. Render only the name of the single app that has the **finweb\*** prefix: Enter the following command, and then select Enter.
 
    ```
-   az webapp list --resource-group Training-Student-0xx-OC0xx --query "[?starts_with(name, 'finweb')].{Name:name}" --output tsv
+   az webapp list --resource-group rg-studentNN --query "[?starts_with(name, 'finweb')].{Name:name}" --output tsv
    ```
 
 1. Enter the following command, and then select Enter to change the current directory to the **Allfiles ~/azure-sre/Allfiles/Labs/02/Starter/Web** directory that contains the lab files:
@@ -446,7 +445,7 @@ In this exercise, you created a web app in Azure, and then deployed your web app
 1. Enter the following command, and then select Enter to deploy the **web.zip** file to the web app that you created previously in this lab:
 
    ```
-   az webapp deploy --resource-group Training-Student-0xx-OC0xx --name <name-of-your-web-app> --src-path web.zip --type zip --restart true
+   az webapp deploy --resource-group rg-studentNN --name <name-of-your-web-app> --src-path web.zip --type zip --restart true
 
    ```
 
@@ -464,9 +463,9 @@ In this exercise, you created a web app in Azure, and then deployed your web app
 
 1. On the Azure portal's **navigation** pane, select **Resource groups**.
 
-1. On the **Resource groups** blade, select the **Training-Student-0xx-OC0xx** resource group.
+1. On the **Resource groups** blade, select the **rg-studentNN** resource group.
 
-1. On the **Training-Student-0xx-OC0xx** blade, select the **finweb**-[yourname] web app that you created previously in this lab.
+1. On the **rg-studentNN** blade, select the **finweb**-[yourname] web app that you created previously in this lab.
 
 1. On the **App Service** blade, select **Browse**.
 

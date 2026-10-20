@@ -26,7 +26,7 @@ steps:
     echo "$(MY_DEVOPS_PAT)" | az devops login
 
     echo "Setting DevOps defaults..."
-    az devops configure --defaults organization=https://dev.azure.com/opscosolutions project=$(projectName)
+    az devops configure --defaults organization=https://dev.azure.com/iis-labs project=$(projectName)
 
     echo "Resolving Pipeline ID for: $(buildPipelineName)..."
     PIPELINE_ID=$(az pipelines show --name "$(buildPipelineName)" --query id --output tsv)
