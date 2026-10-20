@@ -39,7 +39,7 @@ Sign in to your Windows 11 virtual machine (VM).
 1. Navigate to your local git api repository
 1. Create a folder **tests** in your api repository
 1. Inside the **tests/** folder, create the file **smoke_tests.py**
-1. Here, copy the code from the lab repository : /AllFiles/Labs/06/Pipelines/API/smoke_tests.py
+1. Here, copy the code from the lab repository : /Allfiles/Labs/06/Pipelines/API/smoke_tests.py
 1. Replace "https://finapi-yourname.azurewebsites.net" by your api url
 1. Push your changes :
    ```
@@ -146,7 +146,7 @@ Sign in to your Windows 11 virtual machine (VM).
 1. Then run the command below :
 ```
 az monitor log-analytics workspace get-shared-keys \
-  --resource-group ReplaceByYourRessourceGroup \
+  --resource-group rg-studentNN \
   --workspace-name log-analytics-workspace
 ```
 1. This will return two keys as in the example below :
@@ -197,10 +197,10 @@ az monitor log-analytics workspace get-shared-keys \
 
 1. Navigate to your local git api repository
 1. In the folder **tests**, create the file **log_analytics.py**
-1. Here, copy the code from the lab repository : /AllFiles/Labs/06/Pipelines/API/log_analytics.py
+1. Here, copy the code from the lab repository : /Allfiles/Labs/06/Pipelines/API/log_analytics.py
 1. Observe the function "send_log_to_loganalytics()", notice the usage of "workspace_id" and "shared_key"
 1. In the folder **tests**, create the file **smoke_tests_centralized.py**
-1. Here, copy the code from the lab repository : /AllFiles/Labs/06/Pipelines/API/smoke_tests_centralized.py
+1. Here, copy the code from the lab repository : /Allfiles/Labs/06/Pipelines/API/smoke_tests_centralized.py
 1. Replace "https://finapi-yourname.azurewebsites.net" by your api url
 1. Observe the new functions in "smoke_tests_centralized.py", notice the differences with "smoke_tests.py"
 1. Take particular attention to the function "test_send_logs_to_log_analytics()"

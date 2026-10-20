@@ -45,7 +45,7 @@ Sign in to your Windows 11 virtual machine (VM).
 
 1. In the Azure portal, use the **Search resources, services, and docs** text box to search for **Log Analytics workspaces**, and select **+ Create**
 
-1. Select your ressource group, enter **log-analytics-workspace** as the Name
+1. Select your resource group **rg-studentNN**, enter **log-analytics-workspace** as the Name
    
 1. Select **Review + Create**, then **Create**
    

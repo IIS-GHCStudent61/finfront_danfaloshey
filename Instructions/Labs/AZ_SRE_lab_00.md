@@ -68,7 +68,7 @@ In this lab, you will connect for the first time to Azure platform and to Azure 
 ### 1. Create a Repository on GitHub
 
 1. **Sign in to GitHub:**
-   - Go to [GitHub](https://github.com/) and sign in to your account.
+   - Go to [GitHub](https://github.com/) and sign in with the GitHub account assigned to you: username and password are on the **GitHub** tab of the class sheet, and the 2FA code comes from the **2FA codes** page linked there.
 
 2. **Create a New Repository:**
    - Click on the `+` icon at the top right corner and select `New repository`.

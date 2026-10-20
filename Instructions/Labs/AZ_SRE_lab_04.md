@@ -197,7 +197,7 @@ Sign in to your Windows 11 virtual machine (VM).
 1. Rename your pipeline file from "azure-pipelines.yml" to **finweb_yourname_deploy.yml**
    ![image](media/step2.png)
    
-1. Remove all the sample code from your starter pipeline and copy the code from the lab repository : /AllFiles/Labs/04/Pipelines/Web/frontend_deploy.yml
+1. Remove all the sample code from your starter pipeline and copy the code from the lab repository : /Allfiles/Labs/04/Pipelines/Web/frontend_deploy.yml
 
 1. Replace the placeholders in the file by your account values:
    - <<< YOUR AZURE DEVOPS PROJECT >>> should be configured like **&lt;class&gt;-studentNN**
@@ -266,7 +266,7 @@ Sign in to your Windows 11 virtual machine (VM).
    
    ![image](media/step2.png)
    
-1. Here copy the code from the lab repository : /AllFiles/Labs/04/API/Pipeline/api_deploy.yml
+1. Here copy the code from the lab repository : /Allfiles/Labs/04/Pipelines/API/api_deploy.yml
    
 1. Replace the place holders in the file:
    - <<< YOUR AZURE DEVOPS PROJECT >>> should be configured like **&lt;class&gt;-studentNN**

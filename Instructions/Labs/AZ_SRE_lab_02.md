@@ -31,7 +31,7 @@ In this lab, you will explore how to create a web application and blob storage o
 #### Sign in to the lab environment.
 
 1. Sign in to your Windows 11 virtual machine (VM).
-[Link to the credentials](https://github.com/jruels/azure-sre/blob/main/VMs.md)
+Your instructor provides the sign-in for your Windows 11 lab VM.
 
 > **Note**: Your instructor will provide instructions to connect to the virtual lab environment.
 
@@ -98,20 +98,20 @@ In this lab, you will explore how to create a web application and blob storage o
 
 5. To open a new terminal follow the steps as per the screenshots, clic on the "▼" next to "+", then choose **Git Bash**
 
-   ![new terminal](https://github.com/jruels/azure-sre/blob/main/Instructions/Labs/media/visual_studio_new_terminal.png)
+   ![new terminal](https://github.com/Innovation-In-Software/azure-sre/blob/main/Instructions/Labs/media/visual_studio_new_terminal.png)
 
-   ![Git Bash terminal](https://github.com/jruels/azure-sre/blob/main/Instructions/Labs/media/visual_studio_select_git_bash.png)
+   ![Git Bash terminal](https://github.com/Innovation-In-Software/azure-sre/blob/main/Instructions/Labs/media/visual_studio_select_git_bash.png)
 
    > **Note**: If you don't see a terminal (From the menu bar at the top: Terminal > New Terminal)
 
 7. The terminal inside your Visual Studio should look like the screenshot below :
 
-   ![Git Bash](https://github.com/jruels/azure-sre/blob/main/Instructions/Labs/media/visual_studio_git_bash.png)
+   ![Git Bash](https://github.com/Innovation-In-Software/azure-sre/blob/main/Instructions/Labs/media/visual_studio_git_bash.png)
 
 
 8. Clone the GitHub repository
 ```
-git clone https://github.com/jruels/azure-sre
+git clone https://github.com/Innovation-In-Software/azure-sre
 
 ```
 8. This repository contain all the labs material that we will be using later in this course.
@@ -492,7 +492,7 @@ In this exercise, you created a web app in Azure, and then deployed your web app
 
 ##### Setup Git Repositories
 
-1. Create two GIT repositories using your personnal GitHub account : finfront_yourname, finapi_yourname
+1. Create two GIT repositories using the GitHub account assigned to you (class sheet, **GitHub** tab): finfront_yourname, finapi_yourname
 
 1. Clone the two associated repositories on your Windows VM
   
@@ -502,9 +502,9 @@ In this exercise, you created a web app in Azure, and then deployed your web app
 
    `cd ~`
 
-   `git clone https://github.com/<yourpersonnalgitaccount>/finfront_yourname`
+   `git clone https://github.com/<your-github-username>/finfront_yourname`
 
-   `git clone https://github.com/<yourpersonnalgitaccount>/finapi_yourname`
+   `git clone https://github.com/<your-github-username>/finapi_yourname`
 
 1. Copy the Web and and api starter code in your new repositories.
    ```
