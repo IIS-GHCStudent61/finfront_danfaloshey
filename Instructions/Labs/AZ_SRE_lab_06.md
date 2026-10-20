@@ -48,7 +48,7 @@ Sign in to your Windows 11 virtual machine (VM).
    git push
    ```
 
-1. Navigate to **https://dev.azure.com/opscosolutions** and select your project rg-studentNN
+1. Navigate to **https://dev.azure.com/iis-labs** and select your project &lt;class&gt;-studentNN
 1. Navigate to Pipelines > Create new Pipeline   
 1. Where is your code ? Github
 1. Select your api repository 
@@ -109,7 +109,7 @@ Sign in to your Windows 11 virtual machine (VM).
    git push
    ```
 
-1. Navigate to **https://dev.azure.com/opscosolutions** and select your project rg-studentNN
+1. Navigate to **https://dev.azure.com/iis-labs** and select your project &lt;class&gt;-studentNN
 1. Navigate to Pipelines > **finapi_yourname_smoke_test** then select **Run pipeline**.
 1. Click on the job to access the logs, observe the logs of the task **Run full smoke test suite**
     ![image](media/smoke_test_result.png)
@@ -118,7 +118,7 @@ Sign in to your Windows 11 virtual machine (VM).
 
 ### Automate the test pipeline to run after each deployment
 
-1. Navigate to **https://dev.azure.com/opscosolutions** and select your project rg-studentNN
+1. Navigate to **https://dev.azure.com/iis-labs** and select your project &lt;class&gt;-studentNN
 1. Navigate to Pipelines > **finapi_yourname_smoke_test** then **Edit**
 1. Replace line 1 "trigger: none" by the following, and replace "yourname":
    ```
@@ -159,7 +159,7 @@ az monitor log-analytics workspace get-shared-keys \
 1. Copy and save the primarySharedKey value, we will use it in the next steps
    > **Note**: We will use these credentials to push metrics data to Azure Log Analytics from outside Azure.
 
-1. Navigate to **https://dev.azure.com/opscosolutions** and select your project rg-studentNN
+1. Navigate to **https://dev.azure.com/iis-labs** and select your project &lt;class&gt;-studentNN
 1. Select Pipelines > Library, then **+ Variable group**
 1. Create the Variable Group with name **LogAnalyticsSecrets**
 1. Under Variables, select **+ Add** 
@@ -175,7 +175,7 @@ az monitor log-analytics workspace get-shared-keys \
 
 ### Link the Variable Group in your API smoke test pipeline
 
-1. Navigate to **https://dev.azure.com/opscosolutions** and select your project rg-studentNN
+1. Navigate to **https://dev.azure.com/iis-labs** and select your project &lt;class&gt;-studentNN
 1. Navigate to Pipelines > **finapi_yourname_smoke_test** then **Edit**
 1. Insert the following **before** the line 12 that contains "pool:"
    ```
@@ -326,7 +326,7 @@ az monitor log-analytics workspace get-shared-keys \
 
 ## Task 4: Send all API Pipeline run metrics to your centralized Azure Log Analytics
 
-1. Navigate to **https://dev.azure.com/opscosolutions** and select your project rg-studentNN
+1. Navigate to **https://dev.azure.com/iis-labs** and select your project &lt;class&gt;-studentNN
 1. Navigate to Pipelines > **finapi_yourname_smoke_test** then **Edit**
 1. Replace the line "steps:" by the following:
    ```

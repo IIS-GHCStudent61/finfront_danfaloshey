@@ -14,35 +14,20 @@ In this lab, you will connect for the first time to Azure platform and to Azure 
 
 1. Navigate to the Azure platform website: https://portal.azure.com/
 
-1. Use the email and password provided to you by the instructor :
+1. Open the class sheet shared by your instructor and find your row on the **Azure** tab. You need two values:
 
-   Email: student0xx_OC0xx@opscosolutions.onmicrosoft.com
-   
-   Password: ***
+   - **UPN** (your sign-in name), for example `student01-<class>@iisadmin3innovationinsoftwa.onmicrosoft.com`
+   - **TAP** (your Temporary Access Pass). It replaces a password and works for every sign-in until the date in **TAP expires (UTC)**, so you can use it again whenever you're asked to sign in during the class.
 
-1. Click **Next**.
-   
-    ![lab00_Azure_select_account.png](media/lab00_Azure_select_account.png)
+1. Enter your **UPN** and click **Next**.
 
-1. Follow the instructions to **download the Microsoft Authenticator app on your personal phone**. Then click **Next** to setup the two-factor athentication (2FA).
-   
-    ![Lab00_authenticator_setup.png](media/Lab00_authenticator_setup.png)
+1. When the **Enter Temporary Access Pass** page appears, enter your **TAP** and click **Sign in**.
 
-1. Follow the instructions to add an Account and approve notifications, until you finish the setup with this screen.
-   
-    ![Lab00_authenticator_setup_success.png](media/Lab00_authenticator_setup_success.png)
+   > **Note**: There is no password and no authenticator app to set up. If you're asked to set up another sign-in method (such as Microsoft Authenticator), choose **Skip for now** if it's offered. If it isn't, tell your instructor before going further.
 
-1. On the "Stay signed in?" page, tick "Don't show this again" then click **Yes**
+1. On the "Stay signed in?" page, tick "Don't show this again" then click **Yes**.
 
-1. Now you need to approve the sign in request on your phone, enter the matching number is prompted in the authenticator app
-   
-    ![Lab00_authenticator_approve.png](media/Lab00_authenticator_approve.png)
-
-
-    ![Lab00_authenticator_approve_phone.pngg](media/Lab00_authenticator_approve_phone3.png)
-
-   
-  > **Note**: You have now access to your resource groups in the Azure cloud platform.
+  > **Note**: You now have access to your resource groups in the Azure portal.
 
 ![lab00_welcome_azure.png](media/lab00_welcome_azure.png)
 
@@ -53,15 +38,11 @@ In this lab, you will connect for the first time to Azure platform and to Azure 
 
 ### Step-by-Step Instructions
 
-1. Navigate to the Azure DevOps platform website: https://dev.azure.com/opscosolutions
+1. Navigate to the Azure DevOps platform website: https://dev.azure.com/iis-labs
 
-1. Use the email and password provided to you by the instructor :
+1. Sign in with the same **UPN** and **TAP** from the class sheet (Azure tab): enter the UPN, click **Next**, enter the TAP on the **Enter Temporary Access Pass** page and click **Sign in**. If you're still signed in from Activity 1, just pick your account.
 
-   Email: student0xx_OC0xx@opscosolutions.onmicrosoft.com
-   
-   Password: ***
-
-1. Click **Next**.
+1. Your project is `<class>-studentNN`. Its full link is on the **Azure DevOps** tab of the class sheet.
 
 1. On the "Stay signed in?" page, tick "Don't show this again" then click **Yes**
 

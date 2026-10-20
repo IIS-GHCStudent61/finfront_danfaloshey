@@ -247,11 +247,10 @@ git clone https://github.com/jruels/azure-sre
    ```
    > Make sure to select **work account**.
    
-1. In the **Microsoft Edge** browser window, enter the email address and password for your Microsoft account, and then select **Sign in**.
-   > **Note:** The first time connection might require to send a code to your email address 
+1. In the **Microsoft Edge** browser window, sign in with your **UPN** and **TAP** from the class sheet (Azure tab): enter the UPN, select **Next**, enter the TAP on the **Enter Temporary Access Pass** page, and then select **Sign in**.
 
 1. Return to the currently open **Terminal** window and select the tenant and subscribtion to connect.
-   > **Note:** For most cases you will see only one option available (OPSCO Solutions). Type 1, then press enter.
+   > **Note:** For most cases you will see only one option available (our class tenant, iisadmin3innovationinsoftwa.onmicrosoft.com). Type 1, then press enter.
 
 1. List all the apps in your **rg-studentNN** resource group: Within the terminal, enter the following command, and then select Enter. 
 
@@ -413,7 +412,7 @@ In this exercise, you created a web app in Azure, and then deployed your web app
    az login
    ```
 
-1. In the **Microsoft Edge** browser window, enter the email address and password for your Microsoft account, and then select **Sign in**.
+1. In the **Microsoft Edge** browser window, sign in with your **UPN** and **TAP** from the class sheet (Azure tab): enter the UPN, select **Next**, enter the TAP on the **Enter Temporary Access Pass** page, and then select **Sign in**.
 
 1. Return to the currently open **Terminal** window. Wait for the sign-in process to finish.
 

@@ -281,7 +281,7 @@ In this task, you will scale a virtual machine by adjusting its size to a differ
 
 3. Use **az vm show** to ensure the **powerState** is **VM deallocated**.
    ```
-   az vm show  --name myCLIVM --resource-group **** --show-details | grep power
+   az vm show  --name myCLIVM --resource-group rg-studentNN-lab01 --show-details | grep power
    ```
     >**Did you know?** When you use Azure to stop your virtual machine, the status is *deallocated*. This means that any non-static public IPs are released, and you stop paying for the VM’s compute costs.
 
