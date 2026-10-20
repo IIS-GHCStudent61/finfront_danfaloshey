@@ -45,7 +45,7 @@ In this task, you will deploy an Azure virtual machine scale set across availabi
     | Setting | Value |
     | --- | --- |
     | Subscription | the name of your Azure subscription  |
-    | Resource group | **Training-Student-0xx-OC0xx-Lab07** |
+    | Resource group | **rg-studentNN-lab07** |
     | Virtual machine scale set name | `vmss1` |
     | Region | **(US)East US** |
     | Availability zone | **Zones 1, 2, 3** |

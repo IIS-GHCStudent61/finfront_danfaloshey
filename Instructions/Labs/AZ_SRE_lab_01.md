@@ -48,20 +48,22 @@ In this task, you will deploy two Azure virtual machines into different availabi
 
     >**Note**: This will deploy two virtual machines in the selected region, one in each zone. You achieve the 99.99% uptime SLA because you have at least two VMs distributed across at least two zones. In the scenario where you might only need one VM, it is a best practice to still deploy the VM to another zone.
 
+    >**Note**: If you see the new Create-VM preview experience, it may not allow selecting multiple zones. Click **access the previous experience** at the top of the page, or create the two VMs separately (one in Zone 1, one in Zone 2). Creating them separately has no impact, as standalone VMs are independent and not synchronized like a scale set.
+
 1. On the Basics tab, continue completing the configuration,:
 
     | Setting | Value |
     | --- | --- |
     | Subscription | the name of your Azure subscription |
-    | Resource group |  select the resource group **Training-Student-0xx-OC0xx-Lab01** |
+    | Resource group |  select the resource group **rg-studentNN-lab01** |
     | Virtual machine names | `lab01-vm1` and `lab01-vm2` (After selecting both availability zones, select **Edit names** under the VM name field.) |
     | Region | **East US** |
     | Availability options | **Availability zone** |
-    | Availability zone | **Zone 1, 3** (read the note about using virtual machine scale sets) |
+    | Availability zone | **Zone 1, 2** (read the note about using virtual machine scale sets) |
     | Security type | **Standard** |
     | Image | **Windows Server 2025 Datacenter - x64 Gen2** |
     | Azure Spot instance | **unchecked** |
-    | Size | click on the link "See all sizes", then select **Standard B1s** |
+    | Size | click on the link "See all sizes", then select **Standard B2s_v2** |
     | Username | `localadmin` |
     | Password | **Provide a secure password** |
     | Public inbound ports | **None** |
@@ -122,9 +124,9 @@ In this task, you will scale a virtual machine by adjusting its size to a differ
 
 1. On the **lab01-vm1** virtual machine, in the **Availability + scale** blade, select **Size**.
 
-1. Set the virtual machine size to **B2s** and click **Resize**. When prompted, confirm the change.
+1. Set the virtual machine size to **B4s_v2** and click **Resize**. When prompted, confirm the change.
 
-    >**Note**: Choose another size if **B2s** is not available. Resizing is also known as vertical scaling, up or down.
+    >**Note**: Choose another size if **B4s_v2** is not available. Resizing is also known as vertical scaling, up or down.
 
 1. In the **Settings** area, select **Disks**.
 
@@ -133,7 +135,7 @@ In this task, you will scale a virtual machine by adjusting its size to a differ
     | Setting | Value |
     | --- | --- |
     | Disk name | `vm1-disk1` |
-    | Storage type | **Standard HDD** |
+    | Storage type | **Premium SSD v2** |
     | Size (GiB) | `32` |
 
 1. Click **Apply**, then **refresh**.
@@ -150,19 +152,13 @@ In this task, you will scale a virtual machine by adjusting its size to a differ
 
     >**Note:** The **Overview** blade also provides performance and usage information for the disk.
 
-1. In the **Settings** blade, select **Size + performance**.
+1. On the **Overview** blade, review the disk summary, including its **Disk state** (Unattached) and its availability zone / regional distribution.
 
-1. Set the storage type to **Standard SSD**, and then click **Save**.
-
-    >**Note**: You can scale up the disk now that it is detached.
-    
 1. Navigate back to the **lab01-vm1** virtual machine and select **Disks**.
 
 1. In the **Data disk** section, select **Attach existing disks**.
 
 1. In the **Disk name** drop-down, select **VM1-DISK1**. 
-
-1. Verify the disk is now **Standard SSD**.
 
 1. Select **Apply** to save your changes. 
 
@@ -188,7 +184,7 @@ In this task, you will scale a virtual machine by adjusting its size to a differ
     >**Note:** Replace **** with your own resource group.
 
     ```sh
-    az vm create --name myCLIVM --resource-group ****  --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest --admin-username localadmin --generate-ssh-keys --size Standard_B1s
+    az vm create --name myCLIVM --resource-group ****  --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest --admin-username localadmin --generate-ssh-keys --size Standard_B2s_v2
     ```
 
 1. Once the command completes, use **az vm show** to verify your machine was created.
@@ -196,7 +192,7 @@ In this task, you will scale a virtual machine by adjusting its size to a differ
     >**Note:** Replace **** with your own resource group.
     
     ```sh
-    az vm show --name  myCLIVM --resource-group  --show-details
+    az vm show --name myCLIVM --resource-group **** --show-details
     ```
 
 
@@ -285,9 +281,20 @@ In this task, you will scale a virtual machine by adjusting its size to a differ
 
 3. Use **az vm show** to ensure the **powerState** is **VM deallocated**.
    ```
-   az vm show  --name myCLIVM --resource-group Training-Student-0xx-OC0xx-Lab01 --show-details | grep power
+   az vm show  --name myCLIVM --resource-group **** --show-details | grep power
    ```
     >**Did you know?** When you use Azure to stop your virtual machine, the status is *deallocated*. This means that any non-static public IPs are released, and you stop paying for the VM’s compute costs.
+
+### Clean up your Lab01 resources
+
+1. Remove all resources in your **Lab01** resource group (VMs, disks, NICs, public IPs, NSGs, and VNets). The resource group itself is kept.
+
+    >**Warning:** Only run this against your own **rg-studentNN-lab01** resource group.
+
+    ```sh
+    echo '{"$schema":"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#","contentVersion":"1.0.0.0","resources":[]}' > empty.json
+    az deployment group create --resource-group rg-studentNN-lab01 --mode Complete --template-file empty.json
+    ```
 
 
 ## Learn more with self-paced training

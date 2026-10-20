@@ -63,7 +63,7 @@
     },
     "vmSize": {
       "type": "string",
-      "defaultValue": "Standard_B2s",
+      "defaultValue": "Standard_B2s_v2",
       "metadata": {
         "description": "VM size"
       }
@@ -186,6 +186,9 @@
         "count": "[variables('numberOfInstances')]"
       },
       "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard"
+      },
       "properties": {
         "publicIpAllocationMethod": "Static"
       }
@@ -221,7 +224,7 @@
       "sku": {
         "name": "[variables('storageAccountType')]"
       },
-      "kind": "Storage",
+      "kind": "StorageV2",
       "properties": {}
     },
     {

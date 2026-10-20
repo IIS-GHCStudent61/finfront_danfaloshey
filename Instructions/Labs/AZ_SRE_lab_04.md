@@ -130,7 +130,7 @@ Sign in to your Windows 11 virtual machine (VM).
 
 #### Step 0 Generate a token for devops pipeline
 
-1. Navigate to **https://dev.azure.com/opscosolutions** and select your project Training-Student-0xx-OC0xx
+1. Navigate to **https://dev.azure.com/opscosolutions** and select your project rg-studentNN
    
 1. Click the **User Setting** at the top right of your screen.
 
@@ -147,7 +147,7 @@ Sign in to your Windows 11 virtual machine (VM).
 
 #### Step 1 Frontend Package Building 
 
-1. Navigate to **https://dev.azure.com/opscosolutions** and select your project Training-Student-0xx-OC0xx
+1. Navigate to **https://dev.azure.com/opscosolutions** and select your project rg-studentNN
    
 1. Navigate to Pipelines > Create Pipeline
    
@@ -184,7 +184,7 @@ Sign in to your Windows 11 virtual machine (VM).
 
 #### Step 2 Frontend Package Deploy
 
-1. Navigate to **https://dev.azure.com/opscosolutions** and select your project Training-Student-0xx-OC0xx
+1. Navigate to **https://dev.azure.com/opscosolutions** and select your project rg-studentNN
    
 1. Navigate to Pipelines > New Pipeline
    
@@ -200,9 +200,9 @@ Sign in to your Windows 11 virtual machine (VM).
 1. Remove all the sample code from your starter pipeline and copy the code from the lab repository : /AllFiles/Labs/04/Pipelines/Web/frontend_deploy.yml
 
 1. Replace the placeholders in the file by your account values:
-   - <<< YOUR AZURE DEVOPS PROJECT >>> should be configured like **Training-Student-0xx-OC0xx**
+   - <<< YOUR AZURE DEVOPS PROJECT >>> should be configured like **rg-studentNN**
    - <<< YOUR BUILD PIPELINE >>> should be configured like **finweb_yourname_build**
-   - <<< YOUR RESOURCE GROUP >>> should be configured like **Training-Student-0xx-OC0xx**
+   - <<< YOUR RESOURCE GROUP >>> should be configured like **rg-studentNN**
    - <<< YOUR WEB APP >>> should be configured like **finweb-yourname**
    
 1. Click on Variables, add a new one
@@ -222,7 +222,7 @@ Sign in to your Windows 11 virtual machine (VM).
 
 #### API Package Build
 
-1. Navigate to **https://dev.azure.com/opscosolutions** and select your project Training-Student-0xx-OC0xx
+1. Navigate to **https://dev.azure.com/opscosolutions** and select your project rg-studentNN
    
 1. Navigate to Pipelines > New Pipeline
    
@@ -252,7 +252,7 @@ Sign in to your Windows 11 virtual machine (VM).
 
 #### API Package Deploy
 
-1. Navigate to **https://dev.azure.com/opscosolutions** and select your project Training-Student-0xx-OC0xx
+1. Navigate to **https://dev.azure.com/opscosolutions** and select your project rg-studentNN
    
 1. Navigate to Pipelines > New Pipeline
    
@@ -269,9 +269,9 @@ Sign in to your Windows 11 virtual machine (VM).
 1. Here copy the code from the lab repository : /AllFiles/Labs/04/API/Pipeline/api_deploy.yml
    
 1. Replace the place holders in the file:
-   - <<< YOUR AZURE DEVOPS PROJECT >>> should be configured like **Training-Student-0xx-OC0xx**
+   - <<< YOUR AZURE DEVOPS PROJECT >>> should be configured like **rg-studentNN**
    - <<< YOUR BUILD PIPELINE >>> should be configured like **finapi_yourname_build**
-   - <<< YOUR RESSOURCE GROUP >>> should be configured like **Training-Student-0xx-OC0xx**
+   - <<< YOUR RESSOURCE GROUP >>> should be configured like **rg-studentNN**
    - <<< YOUR API APP >>> should be configured like **finapi-yourname**
    
 1. Click on Variables, add a new one
