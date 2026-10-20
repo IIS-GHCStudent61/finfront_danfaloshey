@@ -245,7 +245,7 @@ git clone https://github.com/jruels/azure-sre
    ```
    az login
    ```
-- Make sure to select **work account**.
+> Make sure to select **work account**.
    
 1. In the **Microsoft Edge** browser window, enter the email address and password for your Microsoft account, and then select **Sign in**.
    > **Note:** The first time connection might require to send a code to your email address 
