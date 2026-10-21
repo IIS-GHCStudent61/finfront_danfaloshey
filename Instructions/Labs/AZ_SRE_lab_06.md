@@ -82,6 +82,7 @@ Sign in to your Windows 11 virtual machine (VM).
    ```
    
 1. Save and run  
+1. Navigate to Pipelines, select the 3 dots options on the right side of the line of the pipeline. Select Rename, and input **finapi_yourname_smoke_test**
 1. Click on the job to access the logs, observe how many tests passed and the error in the logs of the task **Run full smoke test suite**   
    > **Note**: By investigating the log message you should identify the root-cause: a timeout error.
    
@@ -210,7 +211,7 @@ az monitor log-analytics workspace get-shared-keys \
    git commit -m "new service"
    git push
    ```
-   > **Note:** Make sure your pipelines run in this order: build -> deploy -> smoke tests.
+   > **Note:** Make sure your pipelines run in this order: build -> deploy -> smoke tests. Run the deploy pipeline manually once the build succeeds; the smoke tests start automatically after the deploy.
 
 1. You should see the message "This pipeline needs permission to access a resource before this run can continue". Click View, then **Permit**
    ![image](media/permit_pipeline.png)
@@ -221,6 +222,9 @@ az monitor log-analytics workspace get-shared-keys \
 1. Navigate to Azure, In the top search bar, type "Log Analytics workspaces" and open it.
 1. Click on the Log Analytics Workspace you're using **log-analytics-workspace**
 1. Select **Logs**, then change from "Simple Mode" to **KQL mode**
+
+   > **Note**: The first time data is sent, the **SmokeTestResults_CL** table can take up to 30 minutes to show results.
+
 1. Enter the following query and **Run**:
    ```
    //Test Duration per Endpoint
@@ -255,8 +259,8 @@ az monitor log-analytics workspace get-shared-keys \
    // Query to Detect recent Failures
    SmokeTestResults_CL
    | where status_s == "fail"
-   | where TimeGenerated > ago(5m)  // check recent 5 minutes
    ```
+   > **Note**: No time filter is needed, the alert rule's evaluation window decides which recent rows are checked.
 
 1. At the top of the Logs screen, click "New alert rule".
 
@@ -331,10 +335,10 @@ az monitor log-analytics workspace get-shared-keys \
 1. Replace the line "steps:" by the following:
    ```
    steps:
-      - script: |
-            echo "##vso[task.setvariable variable=PIPELINE_START_TIME]$(date +%s.%3N)"
-            echo "##vso[task.setvariable variable=PIPELINE_START_TIME_UTC]$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-        displayName: "Capture pipeline start time"
+     - script: |
+         echo "##vso[task.setvariable variable=PIPELINE_START_TIME]$(date +%s.%3N)"
+         echo "##vso[task.setvariable variable=PIPELINE_START_TIME_UTC]$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+       displayName: "Capture pipeline start time"
    
    ```
 
@@ -382,6 +386,10 @@ az monitor log-analytics workspace get-shared-keys \
    ✅ Logs sent to Log Analytics.
    ```
 1. Do the same for the pipelines **finapi_yourname_build** and **finapi_yourname_deploy**
+   > **Notes:** In these two files the steps start at the beginning of the line (`- script:` with no spaces before it). Remove 2 spaces of indentation from the blocks above so they line up, or **Validate and Save** will fail.
+
+   > **Notes:** On their next run, click **View** then **Permit** to give them access to the variable group.
+
    > **Notes:** Additional step, link the "LogAnalyticsSecrets" variable
    
    > **Notes:** Insert the following **after** the line that contains "variables:"
