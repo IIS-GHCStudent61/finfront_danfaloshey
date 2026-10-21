@@ -139,39 +139,94 @@ Sign in to your Windows 11 virtual machine (VM).
 
 ### Setup the connection between Azure DevOps and your log analytics workspace 
 
-1. Navigate to Azure, In the top search bar, type "Log Analytics workspaces" and open it.
-1. Click on the Log Analytics Workspace you're using **log-analytics-workspace**
-1. Select Settings > Properties, then copy the worskpace ID, we will use it later 
-1. We will now retieve our log analytics shared key, to do so, we will use azure CLI
+> **Note**: We send data with the Azure Monitor **Logs Ingestion API**. It needs three things: custom tables in the workspace, a **Data Collection Endpoint (DCE)** that receives the data, and a **Data Collection Rule (DCR)** that describes the data and routes it to the tables. The pipeline signs in with Microsoft Entra ID through your **AzureDevopsConnection** service connection, so there are no workspace keys to copy or store.
+
+> **Permissions needed for this task**
+>
+> | Who | Permission | Why |
+> |---|---|---|
+> | You (your lab account) | **Owner** on **rg-studentNN** (provided in your lab environment) | Contributor-level rights create the tables, the DCE and the DCR. Owner (or User Access Administrator / Role Based Access Control Administrator) is needed to create the role assignment below. |
+> | **AzureDevopsConnection** identity (managed identity **id-ado-studentNN**) | **Contributor** on **rg-studentNN** (already in place) | Lets the pipeline sign in with `az` and get a token. Contributor does **not** allow sending data. |
+> | **AzureDevopsConnection** identity | **Monitoring Metrics Publisher** on the DCR **dcr-lab06** (you grant it in this task) | This role holds the data action that lets the token send data to the rule. Without it the API returns **403 Forbidden**. |
+> | You, in Azure DevOps | Project **Contributor** (default for your project) | Creates the variable group under Pipelines > Library and lets you **Permit** the pipeline to use it. |
+>
+> The workspace shared keys are no longer used, so nobody needs permission to read them.
+
 1. Go to your visual studio terminal, run the az login command
-1. Then run the command below :
-```
-az monitor log-analytics workspace get-shared-keys \
-  --resource-group rg-studentNN \
-  --workspace-name log-analytics-workspace
-```
-1. This will return two keys as in the example below :
-```
-{
-  "primarySharedKey": "4DlDW6N5NLJvQEn2523432423425256134342432423432423423432WA==",
-  "secondarySharedKey": "WNQGbNgADufjLP77e3423423432432423423423424234242342342342="
-}
-```
-1. Copy and save the primarySharedKey value, we will use it in the next steps
-   > **Note**: We will use these credentials to push metrics data to Azure Log Analytics from outside Azure.
+   > **Note**: If your terminal is **Git Bash**, run `export MSYS_NO_PATHCONV=1` first. Otherwise Git Bash rewrites resource IDs that start with "/subscriptions/" into Windows paths and the role assignment fails with **MissingSubscription**.
+1. Create the two custom tables in your workspace (replace NN):
+   ```
+   az monitor log-analytics workspace table create \
+     --resource-group rg-studentNN \
+     --workspace-name log-analytics-workspace \
+     --name SmokeTestResults_CL \
+     --columns TimeGenerated=datetime test=string status=string url=string method=string duration_seconds=real status_code=int message=string source=string
+
+   az monitor log-analytics workspace table create \
+     --resource-group rg-studentNN \
+     --workspace-name log-analytics-workspace \
+     --name PipelineRunSummary_CL \
+     --columns TimeGenerated=datetime pipeline=string run_id=string status=string start_time=string end_time=string duration_seconds=real
+   ```
+   > **Note**: If a table with the same name was created earlier by the retired HTTP Data Collector API (a **Classic** table), the command fails. Run `az monitor log-analytics workspace table migrate --resource-group rg-studentNN --workspace-name log-analytics-workspace --table-name SmokeTestResults_CL` to convert it, then `az monitor log-analytics workspace table delete --resource-group rg-studentNN --workspace-name log-analytics-workspace --name SmokeTestResults_CL --yes`, and run the create command again. Do the same for **PipelineRunSummary_CL**. Rows sent earlier with the old API can still appear in the new table with empty columns; add `| where isnotempty(test)` (or `isnotempty(pipeline)`) to the queries below if they get in the way.
+
+1. Create the Data Collection Endpoint:
+   ```
+   az monitor data-collection endpoint create \
+     --resource-group rg-studentNN \
+     --name dce-lab06 \
+     --location eastus \
+     --public-network-access Enabled
+   ```
+   > **Note**: If the CLI asks to install the **monitor-control-service** extension, answer **Y**.
+
+1. Display the IDs you need for the next steps:
+   ```
+   # Data Collection Endpoint resource ID
+   az monitor data-collection endpoint show --resource-group rg-studentNN --name dce-lab06 --query id -o tsv
+   # Data Collection Endpoint ingestion URL, save it for the variable group
+   az monitor data-collection endpoint show --resource-group rg-studentNN --name dce-lab06 --query logsIngestion.endpoint -o tsv
+   # Log Analytics workspace resource ID
+   az monitor log-analytics workspace show --resource-group rg-studentNN --workspace-name log-analytics-workspace --query id -o tsv
+   ```
+
+1. Copy the file /Allfiles/Labs/06/Pipelines/API/dcr.json from the lab repository to your current folder
+1. In **dcr.json**, replace "<<<YOUR DATA COLLECTION ENDPOINT RESOURCE ID>>>" and "<<<YOUR LOG ANALYTICS WORKSPACE RESOURCE ID>>>" with the IDs displayed above
+1. Observe the **streamDeclarations** section: it describes the columns of each table, and each **dataFlows** entry sends one stream to one table
+1. Create the Data Collection Rule, then display its immutable ID and save it for the variable group:
+   ```
+   az monitor data-collection rule create \
+     --resource-group rg-studentNN \
+     --name dcr-lab06 \
+     --location eastus \
+     --rule-file dcr.json
+
+   az monitor data-collection rule show --resource-group rg-studentNN --name dcr-lab06 --query immutableId -o tsv
+   ```
+
+1. Allow the service connection to send data through the rule. **AzureDevopsConnection** signs in as the managed identity **id-ado-studentNN** in your resource group:
+   ```
+   az role assignment create \
+     --assignee-object-id $(az identity show --resource-group rg-studentNN --name id-ado-studentNN --query principalId -o tsv) \
+     --assignee-principal-type ServicePrincipal \
+     --role "Monitoring Metrics Publisher" \
+     --scope $(az monitor data-collection rule show --resource-group rg-studentNN --name dcr-lab06 --query id -o tsv)
+   ```
+   > **Note**: If the identity is not found, run `az identity list --resource-group rg-studentNN --query "[].name" -o tsv` to see its name.
+
+   > **Note**: The role assignment can take a few minutes to apply. Until then, sending data returns **403 Forbidden**.
 
 1. Navigate to **https://dev.azure.com/iis-labs** and select your project &lt;class&gt;-studentNN
 1. Select Pipelines > Library, then **+ Variable group**
-1. Create the Variable Group with name **LogAnalyticsSecrets**
+1. Create the Variable Group with name **LogAnalyticsIngestion**
 1. Under Variables, select **+ Add** 
-   - Name: LOG_ANALYTICS_WORKSPACE_ID
-      - Value: Saved in previous step
-   - Name: LOG_ANALYTICS_SHARED_KEY
-      - Value: Saved in previous step
+   - Name: LOGS_INGESTION_ENDPOINT
+      - Value: the Data Collection Endpoint ingestion URL saved above
+   - Name: LOGS_INGESTION_DCR_ID
+      - Value: the Data Collection Rule immutable ID saved above (starts with "dcr-")
 
-1. For each variable line, click on the lock icon "Change variable type to secret". Then **Save**
-
-![log_analystics_secrets](media/log_analytic_secret.png)
+1. Select **Save**
+   > **Note**: These values are not secrets. Access is controlled by the Entra ID role you just granted, not by a key.
 
 
 ### Link the Variable Group in your API smoke test pipeline
@@ -181,16 +236,25 @@ az monitor log-analytics workspace get-shared-keys \
 1. Insert the following **before** the line 12 that contains "pool:"
    ```
    variables:
-     - group: LogAnalyticsSecrets
+     - group: LogAnalyticsIngestion
    
    ```
 
-1. Replace the line that contains "/azagent/venv/bin/python3 -m pytest -v --tb=line  -W "ignore::DeprecationWarning" -s tests/smoke_tests.py --junitxml=smoke-results.xml" by the following:
+1. Replace the step **Run full smoke test suite** (the "- script:" block that runs "tests/smoke_tests.py", including its displayName line) by the following:
    ```
-   export LOG_ANALYTICS_WORKSPACE_ID=$(LOG_ANALYTICS_WORKSPACE_ID)
-   export LOG_ANALYTICS_SHARED_KEY=$(LOG_ANALYTICS_SHARED_KEY)
-   /azagent/venv/bin/python3 -m pytest -v --tb=line  -W "ignore::DeprecationWarning" -s tests/smoke_tests_centralized.py --junitxml=smoke-results.xml
+     - task: AzureCLI@2
+       inputs:
+         azureSubscription: 'AzureDevopsConnection'
+         scriptType: 'bash'
+         scriptLocation: 'inlineScript'
+         inlineScript: |
+           export LOGS_INGESTION_ENDPOINT=$(LOGS_INGESTION_ENDPOINT)
+           export LOGS_INGESTION_DCR_ID=$(LOGS_INGESTION_DCR_ID)
+           export LOGS_INGESTION_TOKEN=$(az account get-access-token --resource https://monitor.azure.com --query accessToken -o tsv)
+           /azagent/venv/bin/python3 -m pytest -v --tb=line  -W "ignore::DeprecationWarning" -s tests/smoke_tests_centralized.py --junitxml=smoke-results.xml
+       displayName: "Run full smoke test suite"
    ```
+   > **Note**: The **AzureCLI@2** task signs in as the service connection, so `az account get-access-token` returns a short-lived Entra ID token for Azure Monitor.
    
 1. Save
 
@@ -199,7 +263,7 @@ az monitor log-analytics workspace get-shared-keys \
 1. Navigate to your local git api repository
 1. In the folder **tests**, create the file **log_analytics.py**
 1. Here, copy the code from the lab repository : /Allfiles/Labs/06/Pipelines/API/log_analytics.py
-1. Observe the function "send_log_to_loganalytics()", notice the usage of "workspace_id" and "shared_key"
+1. Observe the function "send_log_to_loganalytics()", notice how it sends the data to a **stream** of your Data Collection Rule ("SmokeTestResults" goes to "Custom-SmokeTestResults_CL") with the Entra ID token in the "Authorization" header
 1. In the folder **tests**, create the file **smoke_tests_centralized.py**
 1. Here, copy the code from the lab repository : /Allfiles/Labs/06/Pipelines/API/smoke_tests_centralized.py
 1. Replace "https://finapi-yourname.azurewebsites.net" by your api url
@@ -223,13 +287,15 @@ az monitor log-analytics workspace get-shared-keys \
 1. Click on the Log Analytics Workspace you're using **log-analytics-workspace**
 1. Select **Logs**, then change from "Simple Mode" to **KQL mode**
 
-   > **Note**: The first time data is sent, the **SmokeTestResults_CL** table can take up to 30 minutes to show results.
+   > **Note**: The first time data is sent after creating the Data Collection Rule, the **SmokeTestResults_CL** table can take up to 30 minutes to show results.
+
+   > **Note**: The column names are exactly the ones declared in your Data Collection Rule (for example **test**, **duration_seconds**). Older examples you may find online use the retired HTTP Data Collector API, which added type suffixes such as **test_s** or **duration_seconds_d**.
 
 1. Enter the following query and **Run**:
    ```
    //Test Duration per Endpoint
    SmokeTestResults_CL
-   | summarize avg_duration = avg(duration_seconds_d) by test_s
+   | summarize avg_duration = avg(duration_seconds) by test
    | order by avg_duration desc
    | render barchart
    ```
@@ -239,8 +305,8 @@ az monitor log-analytics workspace get-shared-keys \
    ```
    // Failures per Test (Total Count)
    SmokeTestResults_CL
-   | where status_s == "fail"
-   | summarize Failures = count() by test_s
+   | where status == "fail"
+   | summarize Failures = count() by test
    | order by Failures desc
    ```
 
@@ -248,7 +314,7 @@ az monitor log-analytics workspace get-shared-keys \
    ```
    // Stacked Bar Chart by Status Code and Test Name
    SmokeTestResults_CL
-   | summarize Count = count() by tostring(status_code_d), test_s
+   | summarize Count = count() by tostring(status_code), test
    | render columnchart kind=stacked
    ```
 
@@ -258,7 +324,7 @@ az monitor log-analytics workspace get-shared-keys \
    ```
    // Query to Detect recent Failures
    SmokeTestResults_CL
-   | where status_s == "fail"
+   | where status == "fail"
    ```
    > **Note**: No time filter is needed, the alert rule's evaluation window decides which recent rows are checked.
 
@@ -344,38 +410,44 @@ az monitor log-analytics workspace get-shared-keys \
 
 1. At the end of the file, add the following:
    ```
-     - script: |
-         export LOG_ANALYTICS_WORKSPACE_ID=$(LOG_ANALYTICS_WORKSPACE_ID)
-         export LOG_ANALYTICS_SHARED_KEY=$(LOG_ANALYTICS_SHARED_KEY)
-         export PIPELINE_NAME=$(Build.DefinitionName)
-         export RUN_ID=$(Build.BuildId)
-         export BUILD_STATUS=$(Agent.JobStatus)
+     - task: AzureCLI@2
+       inputs:
+         azureSubscription: 'AzureDevopsConnection'
+         scriptType: 'bash'
+         scriptLocation: 'inlineScript'
+         inlineScript: |
+           export LOGS_INGESTION_ENDPOINT=$(LOGS_INGESTION_ENDPOINT)
+           export LOGS_INGESTION_DCR_ID=$(LOGS_INGESTION_DCR_ID)
+           export LOGS_INGESTION_TOKEN=$(az account get-access-token --resource https://monitor.azure.com --query accessToken -o tsv)
+           export PIPELINE_NAME=$(Build.DefinitionName)
+           export RUN_ID=$(Build.BuildId)
+           export BUILD_STATUS=$(Agent.JobStatus)
    
-         END_TIME=$(date +%s.%3N)
-         export PIPELINE_END_TIME_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-         export PIPELINE_DURATION=$(awk "BEGIN {print $END_TIME - $(PIPELINE_START_TIME)}")
-         echo "Duration is $PIPELINE_DURATION seconds"
-         echo "PIPELINE_END_TIME_UTC is $PIPELINE_END_TIME_UTC"
-         echo "PIPELINE_START_TIME_UTC is $PIPELINE_START_TIME_UTC"
+           END_TIME=$(date +%s.%3N)
+           export PIPELINE_END_TIME_UTC=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+           export PIPELINE_DURATION=$(awk "BEGIN {print $END_TIME - $(PIPELINE_START_TIME)}")
+           echo "Duration is $PIPELINE_DURATION seconds"
+           echo "PIPELINE_END_TIME_UTC is $PIPELINE_END_TIME_UTC"
+           echo "PIPELINE_START_TIME_UTC is $PIPELINE_START_TIME_UTC"
    
-         /azagent/venv/bin/python3 -c "
-         import os
-         import time
-         from tests.log_analytics import send_log_to_loganalytics
+           /azagent/venv/bin/python3 -c "
+           import os
+           import time
+           from tests.log_analytics import send_log_to_loganalytics
    
-         pipeline_data = [{
-             'pipeline': os.environ.get('PIPELINE_NAME'),
-             'run_id': os.environ.get('RUN_ID'),
-             'status': os.environ.get('BUILD_STATUS'),
-             'start_time': os.environ.get('PIPELINE_START_TIME_UTC'),
-             'end_time': os.environ.get('PIPELINE_END_TIME_UTC'),
-             'duration_seconds': float(os.environ.get('PIPELINE_DURATION') or 0)
-         }]
+           pipeline_data = [{
+               'pipeline': os.environ.get('PIPELINE_NAME'),
+               'run_id': os.environ.get('RUN_ID'),
+               'status': os.environ.get('BUILD_STATUS'),
+               'start_time': os.environ.get('PIPELINE_START_TIME_UTC'),
+               'end_time': os.environ.get('PIPELINE_END_TIME_UTC'),
+               'duration_seconds': float(os.environ.get('PIPELINE_DURATION') or 0)
+           }]
    
-         send_log_to_loganalytics(
-             log_type='PipelineRunSummary',
-             log_data=pipeline_data
-         )"
+           send_log_to_loganalytics(
+               log_type='PipelineRunSummary',
+               log_data=pipeline_data
+           )"
        condition: always()
        displayName: "Send pipeline run metadata to Log Analytics"
    ```
@@ -390,11 +462,11 @@ az monitor log-analytics workspace get-shared-keys \
 
    > **Notes:** On their next run, click **View** then **Permit** to give them access to the variable group.
 
-   > **Notes:** Additional step, link the "LogAnalyticsSecrets" variable
+   > **Notes:** Additional step, link the "LogAnalyticsIngestion" variable group
    
    > **Notes:** Insert the following **after** the line that contains "variables:"
    > ```
-   >   - group: LogAnalyticsSecrets
+   >   - group: LogAnalyticsIngestion
    >
    > ```
 1. Select **Validate and Save**
@@ -424,7 +496,7 @@ az monitor log-analytics workspace get-shared-keys \
    ```
    // Average duration per pipeline
    PipelineRunSummary_CL
-   | summarize avg(duration_seconds_d) by pipeline_s
+   | summarize avg(duration_seconds) by pipeline
    | render barchart 
    ```
    
@@ -432,7 +504,7 @@ az monitor log-analytics workspace get-shared-keys \
    // number of failed pipelines in the last 30 minutes
    PipelineRunSummary_CL
    | where TimeGenerated > ago(30m)
-   | where status_s != "Succeeded"
+   | where status != "Succeeded"
    | summarize FailureCount = count()
    ```
 
