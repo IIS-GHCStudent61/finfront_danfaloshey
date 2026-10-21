@@ -22,9 +22,6 @@ steps:
     echo "Installing Azure DevOps CLI extension..."
     az extension add --name azure-devops || echo "Already installed."
 
-    echo "Logging into Azure DevOps CLI using PAT..."
-    echo "$(MY_DEVOPS_PAT)" | az devops login
-
     echo "Setting DevOps defaults..."
     az devops configure --defaults organization=https://dev.azure.com/iis-labs project=$(projectName)
 
@@ -79,7 +76,7 @@ steps:
     ls
   displayName: 'Fetch Last Successful Build That Has Artifacts'
   env:
-    MY_DEVOPS_PAT: $(MY_DEVOPS_PAT)
+    AZURE_DEVOPS_EXT_PAT: $(MY_DEVOPS_PAT)   # az devops CLI reads the PAT from this env var
 
 - task: AzureCLI@2
   inputs:
@@ -94,5 +91,6 @@ steps:
         --name $(webAppName) \
         --src-path deploy.zip \
         --type zip \
-        --restart true # fixes pipeline error
+        --restart true \
+        --track-status false
   displayName: 'Deploy Artifact to Azure Web App'
