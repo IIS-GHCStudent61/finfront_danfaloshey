@@ -280,18 +280,20 @@ The scale-out rule uses the **average** CPU of all instances in the scale set. I
 
 ### Step 1: Run the CPU stress script on each instance
 
-1. In each Bastion session, open **PowerShell as Administrator**.
+1. In each Bastion session, right-click **Start** and select **Windows PowerShell (Admin)**.
 2. Run the following to simulate 100% CPU usage:
 
    ```powershell
-   for ($i=0; $i -lt 10; $i++) {
-     Start-Job -ScriptBlock { while ($true) {} }
+   for ($i=0; $i -lt $env:NUMBER_OF_PROCESSORS; $i++) {
+     Start-Job -ScriptBlock { (Get-Process -Id $PID).PriorityClass = 'BelowNormal'; while ($true) {} }
    }
    ```
 
-    > **Notes:**  This script launches 10 infinite loops in the background to max out CPU usage. Leave the PowerShell window open. The jobs stop if you close it.
+    > **Notes:**  This script launches one infinite loop per CPU core in the background to max out CPU usage. The loops run at below-normal priority, so the desktop and PowerShell window stay responsive while the CPU is at 100%. Leave the PowerShell window open. The jobs stop if you close it.
 
-3. Open **Task Manager** and confirm the CPU is near 100%.
+    > **Notes:** Typing through Bastion can occasionally repeat a character. If PowerShell reports a parser error, check the line for doubled characters (for example `$i+++`) and run it again. You can also paste with the clipboard button on the Bastion toolbar.
+
+3. Open **Task Manager** and confirm the CPU is near 100%. It can take a minute or two to get there.
 
 ### Step 2: Wait and observe autoscaling
 - Wait **10–15 minutes** to allow the autoscale rule to trigger.
@@ -338,12 +340,21 @@ This will terminate the infinite loops and reduce CPU usage.
 
 ## Task 7: Clean up
 
-Azure Bastion and the scale set instances are billed while they exist. Delete them when you are done.
+Azure Bastion, the scale set instances, the load balancer and the public IP addresses are billed while they exist. Delete them when you are done. Do not delete the resource group itself.
 
 1. Search for and select `Bastions`, select **vmss-vnet-bastion**, then select **Delete**.
 1. Search for and select `Virtual machine scale sets`, select **vmss1**, then select **Delete**.
+1. When both deletions finish, search for and select `Load balancers`, select **vmss-lb**, then select **Delete**.
+1. Search for and select `Public IP addresses`, filter to **rg-studentNN-lab07**, then delete the remaining public IP addresses (the load balancer's and **vmss-vnet-bastion-ip**).
 
-    > **Notes:** In Cloud Shell, `az network bastion delete --resource-group rg-studentNN-lab07 --name vmss-vnet-bastion` and `az vmss delete --resource-group rg-studentNN-lab07 --name vmss1` do the same.
+    > **Notes:** The virtual network, network security group and autoscale setting are free, so you can leave them. In Cloud Shell (Bash), these commands do the same clean-up, in order:
+
+    ```bash
+    az network bastion delete --resource-group rg-studentNN-lab07 --name vmss-vnet-bastion --yes
+    az vmss delete --resource-group rg-studentNN-lab07 --name vmss1
+    az network lb delete --resource-group rg-studentNN-lab07 --name vmss-lb
+    az network public-ip delete --ids $(az network public-ip list --resource-group rg-studentNN-lab07 --query "[].id" -o tsv)
+    ```
 
 ## Key takeaways
 
