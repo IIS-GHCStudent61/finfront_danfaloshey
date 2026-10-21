@@ -59,7 +59,7 @@ Sign in to your Windows 11 virtual machine (VM).
 
 1. Now create a new log analytics ressource as follow:
    - New resource name: **finapi-yourname-analytics**
-   - Log Analytics Workspace: Select the log analytics workspace you created previously (**log-analytics-workspace**)
+   - Log Analytics Workspace: Select the log analytics workspace you created previously (**log-analytics-workspace**). The default is a new *DefaultWorkspace*, make sure to change it.
 
 1. Select **Apply**, then **Yes**
 
@@ -71,7 +71,7 @@ Sign in to your Windows 11 virtual machine (VM).
 
 1. Enter **finapi-diagnostic** as the "Diagnostic setting name"
 
-1. Check also **Send to Log Analytics Workspace for the Destination**, and select your Log Analytics workspace, then hit save.
+1. Check also **Send to Log Analytics Workspace for the Destination**, and select your Log Analytics workspace (**log-analytics-workspace**, not the default), then hit save.
 
    > **Note**: It will take up to 10 minutes for logs to flow properly into your log analytics workspace
 
@@ -81,6 +81,8 @@ Sign in to your Windows 11 virtual machine (VM).
 ### Generate traffic and check the Metrics & Logs are available
 
 1. In your Visual Studio, open a terminal and run the below commands, make sure to replace finweb and finapi by your links:
+
+   > **Note**: Use the **Default domain** from each Web App **Overview** page. New apps use a unique hostname like `finapi-yourname-<random>.eastus-01.azurewebsites.net`.
 
    ```
    # Front end Traffic
@@ -172,7 +174,7 @@ Sign in to your Windows 11 virtual machine (VM).
    git push
    ```
 
-1. Your build pipeline should trigger automatically, check this in azure devops
+1. Your build pipeline should trigger automatically, check this in azure devops. If it does not start after a minute, run **finapi_yourname_build** manually
    
 1. If you build pipeline finished successfuly, trigger your api deploy pipeline
 
@@ -181,7 +183,7 @@ Sign in to your Windows 11 virtual machine (VM).
    curl https://<your-api-app>.azurewebsites.net/high-cpu &
    curl https://<your-api-app>.azurewebsites.net/high-memory &
    ```
-1. The first command should throw an error due to high CPU usage , the second one should return the memory allowed for each call
+1. The first command can take several seconds (or time out on smaller plans) due to high CPU usage, the second one should return the memory allowed for each call
    
 1. If the command were not successfull, you can investigate the logs in Azure on your Web App **finapi-yourname**
    > **Note:** Select **Log Stream** to read the error message in the logs 
