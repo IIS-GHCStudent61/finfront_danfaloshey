@@ -6,7 +6,7 @@ In this lab, you learn how to create a virtual machine scale set and configure a
 
 This lab requires an Azure subscription. Your subscription type may affect the availability of features in this lab. You may change the region, but the steps are written using **East US**.
 
-## Estimated timing: 50 minutes
+## Estimated timing: 75 minutes
 
 ## Lab scenario
 
@@ -16,7 +16,19 @@ Your organization wants to explore automatic scaling. You implement a Virtual Ma
 
 + Task 1: Create and configure Azure Virtual Machine Scale Sets.
 + Task 2: Scale Azure Virtual Machine Scale Sets.
-+ Task 3: Monitor at Scale
++ Task 3: Connect to the instances with Azure Bastion.
++ Task 4: Trigger the scale set to scale out.
++ Task 5: Trigger the scale set to scale in.
++ Task 6: Visualize CPU metrics in Azure Monitor.
++ Task 7: Clean up.
+
+## Permissions needed
+
+| Who | Role | Scope | Why |
+| --- | --- | --- | --- |
+| You (student account) | **Owner** (already assigned) | `rg-studentNN-lab07` | Create the scale set, load balancer, network, autoscale settings and Azure Bastion, and connect to the instances. Contributor or Network Contributor plus Virtual Machine Contributor is the minimum. |
+
+> **Note**: Everything in this lab is created in your own resource group, so no administrator setup is needed. Azure Bastion is billed by the hour, so complete **Task 7** at the end of the lab.
 
 
 ## Instructions
@@ -48,17 +60,19 @@ In this task, you will deploy an Azure virtual machine scale set across availabi
     | Resource group | **rg-studentNN-lab07** |
     | Virtual machine scale set name | `vmss1` |
     | Region | **(US)East US** |
-    | Availability zone | **Zones 1, 2, 3** |
+    | Availability zone | **Zones 1, 2** |
     | Orchestration mode | **Uniform** |
     | Security type | **Standard** |
     | Scaling options | **Review and take the defaults**. We will change this in the next task. |
     | Image | **Windows Server 2019 Datacenter - x64 Gen2** |
-    | Size | click on the link "See all sizes", then select **Standard B1s** |
+    | Size | click on the link "See all sizes", then select **Standard_B2s_v2** |
     | Username | `localadmin` |
     | Password | **Provide a secure password**  |
     | Already have a Windows Server license? | **Unchecked** |
 
     > **Notes:** For the list of Azure regions which support deployment of Windows virtual machines to availability zones, refer to [What are Availability Zones in Azure?](https://docs.microsoft.com/en-us/azure/availability-zones/az-overview)
+
+    > **Notes:** The older **Standard B1s** size is no longer offered in East US, and **Standard_B2s_v2** may not be available in zone 3 for your subscription. If the portal shows a size or zone as unavailable, pick zones that the size supports. To check from Cloud Shell, run `az vm list-skus -l eastus --size Standard_B2s_v2 -o table` and look at the **Restrictions** column.
 
     ![lab07_create_vmss.png](media/lab07_create_vmss.png)
 
@@ -172,7 +186,7 @@ In this task, you scale the virtual machine scale set using a custom scale rule.
 
 1. During evenings or weekends, demand may decrease so it is important to create a scale in rule.
 
-1. Let's create a rule that decreases the number of VM instances in a scale set. The number of instances should decrease when the average CPU load drops below 30% over a 10-minute period. When the rule triggers, the number of VM instances is decreased by 20%.
+1. Let's create a rule that decreases the number of VM instances in a scale set. The number of instances should decrease when the average CPU load drops below 30% over a 10-minute period. When the rule triggers, the number of VM instances is decreased by 50%.
 
 1. Select **Add a rule**, adjust the settings, then select **Add**.
 
@@ -201,27 +215,72 @@ In this task, you scale the virtual machine scale set using a custom scale rule.
 
 1. On the **vmss1** page, select **Instances**. This is where you would monitor the number of virtual machine instances.
 
-    > **Notes:**  If you are interested in using Azure PowerShell for virtual machine creation, try Task 5. If you are interested in using the CLI to create virtual machines, try Task 6.
+---
+
+## Task 3: Connect to the instances with Azure Bastion
+
+In this task, you deploy Azure Bastion into the scale set's virtual network so you can sign in to the instances from the browser. The instances only allow HTTP from the internet (the `allow-http` rule), so Bastion gives you RDP access without opening port 3389.
+
+Azure Bastion needs:
+
++ A subnet named exactly `AzureBastionSubnet`, size /26 or larger, in the same virtual network as the instances (`vmss-vnet`).
++ A Standard SKU public IP address. The portal creates it for you.
++ The **Basic** tier or higher. The free **Developer** tier is not documented to support scale set instances, so this lab uses Basic.
+
+1. In the Azure portal, search for and select `Virtual networks`, then select **vmss-vnet**.
+
+1. Select **Settings > Subnets**, then select **+ Subnet**. Specify the following settings and select **Add**.
+
+    | Setting | Value |
+    | --- | --- |
+    | Subnet purpose | **Azure Bastion** |
+    | Name | `AzureBastionSubnet` (filled in for you) |
+    | Starting address | `10.82.1.0` |
+    | Size | **/26** |
+
+1. Search for and select `Bastions`, then select **+ Create**. Specify the following settings (leave others with their default values) and select **Review + create**, then **Create**.
+
+    | Setting | Value |
+    | --- | --- |
+    | Resource group | **rg-studentNN-lab07** |
+    | Name | `vmss-vnet-bastion` |
+    | Region | **(US) East US** |
+    | Tier | **Basic** |
+    | Virtual network | **vmss-vnet** |
+    | Subnet | **AzureBastionSubnet** |
+    | Public IP address | **Create new**, name `vmss-vnet-bastion-ip` |
+
+    > **Notes:** The deployment takes about 5 to 10 minutes. Azure Bastion is billed by the hour while it exists, so delete it in **Task 7**.
+
+    > **Notes:** If you prefer Cloud Shell (Bash), these commands create the same resources:
+
+    ```bash
+    az network vnet subnet create --resource-group rg-studentNN-lab07 --vnet-name vmss-vnet --name AzureBastionSubnet --address-prefixes 10.82.1.0/26
+    az network public-ip create --resource-group rg-studentNN-lab07 --name vmss-vnet-bastion-ip --location eastus --sku Standard --allocation-method Static
+    az network bastion create --resource-group rg-studentNN-lab07 --name vmss-vnet-bastion --location eastus --vnet-name vmss-vnet --public-ip-address vmss-vnet-bastion-ip --sku Basic
+    ```
+
+1. When the deployment completes, go to **Virtual machine scale sets > vmss1 > Instances** and select the first instance (for example `vmss1_0`).
+
+1. Select **Connect > Bastion**. Change **Authentication Type** from **Microsoft Entra ID** to **VM Password**, then sign in with:
+   - **Username**: `localadmin`
+   - **VM Password**: the one you set during VMSS creation
+
+    > **Notes:** **Microsoft Entra ID** is the default, but it needs a login extension and an extra role on the instance, which this lab does not set up.
+
+    > **Notes:** If your browser blocks the pop-up window, allow pop-ups for the Azure portal and try again.
+
+1. Repeat the previous two steps for the second instance, in a new browser tab. You need a session on **every** instance for the next task.
 
 ---
 
-## Task 3: Create and configure Azure Virtual Machine Scale Sets
+## Task 4: Trigger the scale set to scale out
 
+The scale-out rule uses the **average** CPU of all instances in the scale set. If you only load one of two instances, the average stays around 50% and never crosses the 70% threshold. Run the stress script on every instance.
 
-### Step 1: Login to your machine
+### Step 1: Run the CPU stress script on each instance
 
-1. Go to the Azure portal.
-2. Navigate to **Virtual machine scale sets > vmss1 > Instances**.
-3. Select an instance (e.g., `vmss1_0`).
-4. Click **Connect > Bastion**.
-5. Log in using:
-   - **Username**: `localadmin`
-   - **Password**: (the one you set during VMSS creation)
-
-
-
-### Step 2: Open PowerShell and Run CPU Stress Script
-1. Open **PowerShell as Administrator** inside the VM.
+1. In each Bastion session, open **PowerShell as Administrator**.
 2. Run the following to simulate 100% CPU usage:
 
    ```powershell
@@ -230,51 +289,61 @@ In this task, you scale the virtual machine scale set using a custom scale rule.
    }
    ```
 
-    > **Notes:**  This script launches 10 infinite loops in the background to max out CPU usage.
+    > **Notes:**  This script launches 10 infinite loops in the background to max out CPU usage. Leave the PowerShell window open. The jobs stop if you close it.
 
-### Step 3: Wait and Observe Autoscaling
+3. Open **Task Manager** and confirm the CPU is near 100%.
+
+### Step 2: Wait and observe autoscaling
 - Wait **10–15 minutes** to allow the autoscale rule to trigger.
 - Navigate to:
   - **VMSS > Scaling > Run history** – to view autoscale event logs.
   - **VMSS > Instances** – to watch for new VM instances being added.
 
-    > **Notes:** The scale out rule should trigger when CPU > 70% for 10 minutes.
+    > **Notes:** The scale out rule should trigger when CPU > 70% for 10 minutes. With 2 instances, a 50% increase adds 1 instance. You may see a second scale-out about 5 minutes later, after the cool-down, because the 10-minute average still includes the time before the new instance joined, and a new Windows instance is busy while it starts. Instance names are not always sequential. For example, the new instance may be `vmss1_3` rather than `vmss1_2`.
 
 ---
 
-## Task 4: Trigger VMSS to Scale In
+## Task 5: Trigger the scale set to scale in
 
-### Step 1: Stop the CPU Load
-1. In the same PowerShell session, run:
+### Step 1: Stop the CPU load
+1. In each Bastion session, run:
 
    ```powershell
    Get-Job | Stop-Job
    ```
 This will terminate the infinite loops and reduce CPU usage.
 
-
-### Step 2: Wait and Observe Scaling In
+### Step 2: Wait and observe scaling in
 1. Wait **10–15 minutes** for the average CPU to drop below 30%.
 1. Monitor:
    - **VMSS > Scaling > Run history**
    - **VMSS > Instances** – to observe VM instances being removed.
 
-    > **Notes:** VMSS will scale back in according to the configured scale-in rule.
+    > **Notes:** VMSS will scale back in according to the configured scale-in rule, but never below the minimum of 2 instances. Your Bastion session closes if the instance you are connected to is removed.
 
 ---
 
-## Task 5: Visualize CPU Metrics in Azure Monitor
+## Task 6: Visualize CPU metrics in Azure Monitor
 
-### Step 1: View Real-Time Metrics
+### Step 1: View real-time metrics
 1. Go to **Monitor > Metrics** in the Azure portal.
 2. Set **Scope** to your `vmss1` resource.
 3. Select:
    - **Metric Namespace**: `Virtual Machine Host`
    - **Metric**: `Percentage CPU`
 4. Set **Aggregation** to `Average`.
-5. Filter by instance, and optionally change granularity to **1 minute**.
+5. Select **Apply splitting** and split by **VMName** to see each instance, and optionally change granularity to **1 minute**.
 
 ---
+
+## Task 7: Clean up
+
+Azure Bastion and the scale set instances are billed while they exist. Delete them when you are done.
+
+1. Search for and select `Bastions`, select **vmss-vnet-bastion**, then select **Delete**.
+1. Search for and select `Virtual machine scale sets`, select **vmss1**, then select **Delete**.
+
+    > **Notes:** In Cloud Shell, `az network bastion delete --resource-group rg-studentNN-lab07 --name vmss-vnet-bastion` and `az vmss delete --resource-group rg-studentNN-lab07 --name vmss1` do the same.
 
 ## Key takeaways
 
@@ -286,5 +355,6 @@ Congratulations on completing the lab. Here are the main takeaways for this lab.
 + Custom autoscale rules enable precise control over when the scale set scales out or in, based on metrics such as average CPU utilization.  
 + Instance limits (minimum, maximum and default counts) protect against over- or under-provisioning when autoscale rules run.  
 + Azure Monitor provides real-time metrics and run-history logs so you can verify and troubleshoot autoscale events.  
-+ Generating workload (for example, stressing CPU inside a VM) is an effective way to test that your scale-out and scale-in rules behave as expected.  
++ Generating workload (for example, stressing CPU inside a VM) is an effective way to test that your scale-out and scale-in rules behave as expected. Because the rules use the average across all instances, the load has to reach every instance.  
++ Azure Bastion gives browser-based RDP to private instances without opening RDP ports to the internet. It needs its own `AzureBastionSubnet` and is billed by the hour, so delete it when you are done.  
 + VMSS reduces operational overhead by automatically distributing traffic through the load balancer and maintaining consistent configuration across all instances.
