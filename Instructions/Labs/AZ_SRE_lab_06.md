@@ -141,7 +141,19 @@ Sign in to your Windows 11 virtual machine (VM).
 
 > **Note**: We send data with the Azure Monitor **Logs Ingestion API**. It needs three things: custom tables in the workspace, a **Data Collection Endpoint (DCE)** that receives the data, and a **Data Collection Rule (DCR)** that describes the data and routes it to the tables. The pipeline signs in with Microsoft Entra ID through your **AzureDevopsConnection** service connection, so there are no workspace keys to copy or store.
 
+> **Permissions needed for this task**
+>
+> | Who | Permission | Why |
+> |---|---|---|
+> | You (your lab account) | **Owner** on **rg-studentNN** (provided in your lab environment) | Contributor-level rights create the tables, the DCE and the DCR. Owner (or User Access Administrator / Role Based Access Control Administrator) is needed to create the role assignment below. |
+> | **AzureDevopsConnection** identity (managed identity **id-ado-studentNN**) | **Contributor** on **rg-studentNN** (already in place) | Lets the pipeline sign in with `az` and get a token. Contributor does **not** allow sending data. |
+> | **AzureDevopsConnection** identity | **Monitoring Metrics Publisher** on the DCR **dcr-lab06** (you grant it in this task) | This role holds the data action that lets the token send data to the rule. Without it the API returns **403 Forbidden**. |
+> | You, in Azure DevOps | Project **Contributor** (default for your project) | Creates the variable group under Pipelines > Library and lets you **Permit** the pipeline to use it. |
+>
+> The workspace shared keys are no longer used, so nobody needs permission to read them.
+
 1. Go to your visual studio terminal, run the az login command
+   > **Note**: If your terminal is **Git Bash**, run `export MSYS_NO_PATHCONV=1` first. Otherwise Git Bash rewrites resource IDs that start with "/subscriptions/" into Windows paths and the role assignment fails with **MissingSubscription**.
 1. Create the two custom tables in your workspace (replace NN):
    ```
    az monitor log-analytics workspace table create \
@@ -156,6 +168,7 @@ Sign in to your Windows 11 virtual machine (VM).
      --name PipelineRunSummary_CL \
      --columns TimeGenerated=datetime pipeline=string run_id=string status=string start_time=string end_time=string duration_seconds=real
    ```
+   > **Note**: If a table with the same name was created earlier by the retired HTTP Data Collector API (a **Classic** table), the command fails. Run `az monitor log-analytics workspace table migrate --resource-group rg-studentNN --workspace-name log-analytics-workspace --table-name SmokeTestResults_CL` to convert it, then `az monitor log-analytics workspace table delete --resource-group rg-studentNN --workspace-name log-analytics-workspace --name SmokeTestResults_CL --yes`, and run the create command again. Do the same for **PipelineRunSummary_CL**. Rows sent earlier with the old API can still appear in the new table with empty columns; add `| where isnotempty(test)` (or `isnotempty(pipeline)`) to the queries below if they get in the way.
 
 1. Create the Data Collection Endpoint:
    ```
@@ -191,16 +204,16 @@ Sign in to your Windows 11 virtual machine (VM).
    az monitor data-collection rule show --resource-group rg-studentNN --name dcr-lab06 --query immutableId -o tsv
    ```
 
-1. Navigate to **https://dev.azure.com/iis-labs** and select your project &lt;class&gt;-studentNN
-1. Select **Project settings** > **Service connections** > **AzureDevopsConnection**, then **Manage App registration** (or **Manage service principal**)
-1. Copy the **Application (client) ID**
-1. Back in your terminal, allow the service connection to send data through the rule (replace &lt;client-id&gt;):
+1. Allow the service connection to send data through the rule. **AzureDevopsConnection** signs in as the managed identity **id-ado-studentNN** in your resource group:
    ```
    az role assignment create \
-     --assignee <client-id> \
+     --assignee-object-id $(az identity show --resource-group rg-studentNN --name id-ado-studentNN --query principalId -o tsv) \
+     --assignee-principal-type ServicePrincipal \
      --role "Monitoring Metrics Publisher" \
      --scope $(az monitor data-collection rule show --resource-group rg-studentNN --name dcr-lab06 --query id -o tsv)
    ```
+   > **Note**: If the identity is not found, run `az identity list --resource-group rg-studentNN --query "[].name" -o tsv` to see its name.
+
    > **Note**: The role assignment can take a few minutes to apply. Until then, sending data returns **403 Forbidden**.
 
 1. Navigate to **https://dev.azure.com/iis-labs** and select your project &lt;class&gt;-studentNN
