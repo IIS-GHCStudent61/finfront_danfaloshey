@@ -114,7 +114,9 @@ In this task, you will deploy an Azure virtual machine scale set across availabi
 
 1. Click **Add** and, back on the **Create network security group** blade, click **OK**.
 
-1. In the **Edit network interface** blade, in the **Public IP address** section, click **Enabled** and click **OK**.
+1. In the **Edit network interface** blade, in the **Public IP address** section, leave it **Disabled** and click **OK**.
+
+    > **Notes:** The instances do not need their own public IP addresses. Web traffic reaches them through the load balancer, and you sign in through Azure Bastion in Task 3. This keeps the instances off the internet and saves public IP quota.
 
 1. In the **Networking** tab, under the **Load balancing** section, specify the following (leave others with their default values).
 
@@ -208,8 +210,10 @@ In this task, you scale the virtual machine scale set using a custom scale rule.
     | Setting | Value |
     | --- | --- |
     | Minimum | **2** |
-    | Maximum | **10** |
+    | Maximum | **4** |
     | Default | **2** |
+
+    > **Notes:** A maximum of 4 is enough to see scale-out and keeps the class within the subscription's vCPU quota. In production, set the maximum from your expected peak load and your quota.
 
 1. Be sure to **Save** your changes
 
@@ -219,7 +223,7 @@ In this task, you scale the virtual machine scale set using a custom scale rule.
 
 ## Task 3: Connect to the instances with Azure Bastion
 
-In this task, you deploy Azure Bastion into the scale set's virtual network so you can sign in to the instances from the browser. The instances only allow HTTP from the internet (the `allow-http` rule), so Bastion gives you RDP access without opening port 3389.
+In this task, you deploy Azure Bastion into the scale set's virtual network so you can sign in to the instances from the browser. The instances have no public IP addresses, so Bastion gives you RDP access without exposing them to the internet or opening port 3389.
 
 Azure Bastion needs:
 
@@ -301,7 +305,7 @@ The scale-out rule uses the **average** CPU of all instances in the scale set. I
   - **VMSS > Scaling > Run history** – to view autoscale event logs.
   - **VMSS > Instances** – to watch for new VM instances being added.
 
-    > **Notes:** The scale out rule should trigger when CPU > 70% for 10 minutes. With 2 instances, a 50% increase adds 1 instance. You may see a second scale-out about 5 minutes later, after the cool-down, because the 10-minute average still includes the time before the new instance joined, and a new Windows instance is busy while it starts. Instance names are not always sequential. For example, the new instance may be `vmss1_3` rather than `vmss1_2`.
+    > **Notes:** The scale out rule should trigger when CPU > 70% for 10 minutes. With 2 instances, a 50% increase adds 1 instance. You may see a second scale-out about 5 minutes later, after the cool-down, because the 10-minute average still includes the time before the new instance joined, and a new Windows instance is busy while it starts. The scale set never goes above the maximum of 4. Instance names are not always sequential. For example, the new instance may be `vmss1_3` rather than `vmss1_2`.
 
 ---
 
