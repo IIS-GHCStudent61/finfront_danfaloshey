@@ -80,6 +80,8 @@ Your instructor provides the sign-in for your Windows 11 lab VM.
 
 1. On the **Access keys** blade, review any one of the **Connection string**s (using **Show** button), and then record the value of either **Connection string** boxes in Notepad. 
 
+   ![Access keys blade showing the Connection string](./media/lab02_access_keys_connection_string.png)
+
    > **Note**: It doesn't matter which **connection string** you choose. They are interchangeable.
    
    > ⚠️ The **Keys** are platform-managed encryption keys and are **not used for this lab.**
