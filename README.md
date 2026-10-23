@@ -5,6 +5,7 @@
 Each delivery has its own credentials sheet — open the one for **your** class (date and instructor).
 
 <!-- iis-class-links:start -->
+- **Azure SRE (10/26, Kaur)**: [class sheet](https://docs.google.com/spreadsheets/d/1Bz04XXfkAi6mcvqcK9qkaUlYALaZtsPjLDJv-tnhKfk/edit)   <!-- cohort:azure-sre-2026-oct26-kaur -->
 - **Azure SRE (10/26, Pugh)**: [class sheet](https://docs.google.com/spreadsheets/d/1nH4sBwR-3zAOLGRiSzG97CXdidX3NMuZt0YPRfpfNtY/edit)   <!-- cohort:azure-sre-2026-oct26-pugh -->
 <!-- iis-class-links:end -->
 
