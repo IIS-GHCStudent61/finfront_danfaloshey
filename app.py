@@ -78,8 +78,6 @@ def delete_price():
             result = {"error": str(e)}
     return render_template('delete_price.html', result=result)
 
-
-
 @app.route('/slow-endpoint')
 def slow_endpoint():
     if 'user' not in session:
@@ -92,10 +90,6 @@ def slow_endpoint():
         result = {"error": str(e)}
 
     return result
-
-
-
-
 
 @app.route('/logout')
 def logout():
