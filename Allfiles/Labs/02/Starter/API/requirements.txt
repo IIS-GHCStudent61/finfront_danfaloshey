@@ -1,5 +1,0 @@
-flask
-gunicorn
-azure-storage-blob
-requests
-
